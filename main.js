@@ -21,7 +21,7 @@ const ctx = canvas.getContext('2d');
 
 // --- INITIALIZATION ---
 const params = new URLSearchParams(window.location.search);
-if (params.has('msg') || params.has('bg')) {
+if (params.has('msg') || params.has('bg') || params.has('cover')) {
   initViewer(Object.fromEntries(params));
 } else {
   initCreator();
@@ -48,21 +48,7 @@ function initCreator() {
     }
   });
 
-  setupToggle('.options button[data-bg]', (dataset, btn) => {
-    const urlInput = document.getElementById('input-bg-url');
-    const urlHint = document.getElementById('bg-url-hint');
 
-    urlInput.classList.add('hidden');
-    urlHint.classList.add('hidden');
-    urlInput.required = false;
-
-    if (dataset.bg !== 'default') {
-      urlInput.classList.remove('hidden');
-      urlHint.classList.remove('hidden');
-      urlInput.required = true;
-      urlInput.placeholder = 'https://drive.google.com/file/d/... (image)';
-    }
-  });
 
   // Generate Link
   document.getElementById('creator-form').addEventListener('submit', async (e) => {
@@ -183,15 +169,7 @@ function getFormValues() {
     coverUrl = document.getElementById('input-cover-url').value;
   }
 
-  // Background
-  const bgBtn = document.querySelector('.options button[data-bg].active');
-  let bgUrl = DEFAULTS.bg;
-
-  if (bgBtn.dataset.bg !== 'default') {
-    bgUrl = document.getElementById('input-bg-url').value;
-  }
-
-  return { msg, cover: coverUrl, bg: bgUrl };
+  return { msg, cover: coverUrl };
 }
 
 function generateLink(config) {
@@ -201,9 +179,6 @@ function generateLink(config) {
   // Only add if not default
   if (config.cover !== DEFAULTS.cover) {
     params.set('cover', config.cover);
-  }
-  if (config.bg !== DEFAULTS.bg) {
-    params.set('bg', config.bg);
   }
 
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
@@ -217,13 +192,24 @@ function initViewer(config) {
   // Normalize defaults
   const msg = config.msg || DEFAULTS.msg;
   const cover = config.cover || DEFAULTS.cover;
-  const bg = config.bg || DEFAULTS.bg;
 
   // 1. Setup Text
-  viewerText.innerText = msg;
+  viewerText.innerHTML = `
+    <div>${msg}</div>
+    <br>
+    <a href="https://www.lumios-le-jeu.fr/" target="_blank" style="color: white; text-decoration: underline; font-size: 0.8em; display: block; margin-top: 10px;">
+      Bon pour un jeu Lumios !
+    </a>
+  `;
 
-  // 2. Setup Background
+  // 2. Setup Background (Automatic based on device)
   viewerBgContainer.innerHTML = '';
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  // If height > width (portrait) -> telephone.jpg, else -> ordi.jpg
+  const isPortrait = height > width;
+  const fixedBg = isPortrait ? `${BASE_URL}telephone.jpg` : `${BASE_URL}ordi.jpg`;
 
   // Convert Drive Link if needed - try multiple formats
   const normalizeUrl = (url) => {
@@ -250,18 +236,17 @@ function initViewer(config) {
     return url;
   };
 
-  const finalBg = normalizeUrl(bg);
   const finalCover = normalizeUrl(cover);
 
   const mediaEl = document.createElement('img');
   // Use proxy immediately for Drive to avoid console noise
-  const bgToLoad = finalBg.includes('drive.google.com') ? maybeProxy(finalBg) : finalBg;
+  const bgToLoad = fixedBg.includes('drive.google.com') ? maybeProxy(fixedBg) : fixedBg;
   mediaEl.src = bgToLoad;
 
   mediaEl.onerror = () => {
-    if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
+    if (!mediaEl.src.includes('allorigins') && fixedBg.includes('drive.google.com')) {
       console.warn("Retry background with proxy...");
-      mediaEl.src = maybeProxy(finalBg);
+      mediaEl.src = maybeProxy(fixedBg);
     }
   };
   viewerBgContainer.appendChild(mediaEl);
