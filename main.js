@@ -65,7 +65,7 @@ function initCreator() {
   });
 
   // Generate Link
-  document.getElementById('creator-form').addEventListener('submit', async (e) => {
+  document.getElementById('creator-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const config = getFormValues();
     const longLink = generateLink(config);
@@ -73,31 +73,13 @@ function initCreator() {
     const resultArea = document.getElementById('result-area');
     const shareInput = document.getElementById('share-link');
     const openBtn = document.getElementById('open-link-btn');
-    const copyBtn = document.getElementById('copy-btn');
 
-    // Show long link immediately
     shareInput.value = longLink;
     openBtn.href = longLink;
     resultArea.classList.remove('hidden');
 
     // Scroll to results
     resultArea.scrollIntoView({ behavior: 'smooth' });
-
-    // Try to shorten the link
-    if (!longLink.includes('localhost') && !longLink.includes('127.0.0.1')) {
-      const originalText = copyBtn.innerText;
-      copyBtn.innerText = '...';
-      copyBtn.style.opacity = '0.5';
-
-      const shortLink = await shortenURL(longLink);
-      if (shortLink !== longLink) {
-        shareInput.value = shortLink;
-        openBtn.href = shortLink;
-      }
-
-      copyBtn.innerText = originalText;
-      copyBtn.style.opacity = '1';
-    }
   });
 
   // Copy Button
@@ -139,24 +121,7 @@ function initCreator() {
   });
 }
 
-async function shortenURL(url) {
-  try {
-    // Use allorigins proxy to bypass CORS for is.gd
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const targetUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
 
-    const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-    if (response.ok) {
-      const shortUrl = await response.text();
-      if (shortUrl.startsWith('https://is.gd/')) {
-        return shortUrl;
-      }
-    }
-  } catch (err) {
-    console.warn('URL shortening failed:', err);
-  }
-  return url;
-}
 
 function setupToggle(selector, callback) {
   const btns = document.querySelectorAll(selector);
