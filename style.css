@@ -21,7 +21,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* For app-like feel */
+  overflow: hidden;
+  /* For app-like feel */
 }
 
 /* --- CREATOR VIEW --- */
@@ -72,7 +73,8 @@ label {
   color: var(--text);
 }
 
-input[type="text"], input[type="url"] {
+input[type="text"],
+input[type="url"] {
   width: 100%;
   padding: 12px 16px;
   border-radius: 12px;
@@ -120,7 +122,9 @@ input:focus {
   margin-top: 20px;
 }
 
-button[type="submit"], #preview-btn, #copy-btn {
+button[type="submit"],
+#preview-btn,
+#copy-btn {
   flex: 1;
   padding: 14px;
   border: none;
@@ -144,7 +148,7 @@ button[type="submit"] {
 
 button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .hidden {
@@ -164,7 +168,7 @@ button:hover {
 }
 
 #share-link {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   font-size: 0.8rem;
 }
 
@@ -175,6 +179,7 @@ button:hover {
   text-decoration: none;
   font-size: 0.9rem;
 }
+
 .preview-link:hover {
   color: white;
   text-decoration: underline;
@@ -199,7 +204,8 @@ button:hover {
   z-index: 1;
 }
 
-#background-container img, #background-container video {
+#background-container img,
+#background-container video {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -210,15 +216,17 @@ button:hover {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2; /* Below Scratch */
+  z-index: 2;
+  /* Below Scratch */
   width: 80%;
   text-align: center;
   color: white;
   font-family: 'Playfair Display', serif;
   font-size: 3rem;
   font-weight: 700;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  pointer-events: none; /* Let clicks pass through */
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  /* Let clicks pass through */
 }
 
 #scratch-canvas {
@@ -236,7 +244,7 @@ button:hover {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   padding: 10px 20px;
   border-radius: 30px;
   display: flex;
@@ -249,35 +257,79 @@ button:hover {
 
 /* Animations */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: translateX(-50%) scale(1); }
-  50% { transform: translateX(-50%) scale(1.05); }
-  100% { transform: translateX(-50%) scale(1); }
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 @keyframes gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
-.fade-out {
-    opacity: 0;
-    pointer-events: none;
+/* File Input Styling */
+.file-input {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.warning-box {
+  background: rgba(255, 165, 0, 0.15);
+  border: 1px solid orange;
+  color: #ffb86c;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.divider {
+  height: 1px;
+  background: var(--glass-border);
+  margin: 20px 0;
 }

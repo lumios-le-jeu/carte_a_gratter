@@ -35,35 +35,54 @@ function initCreator() {
 
   // Input Toggles
   setupToggle('.options button[data-cover]', (dataset, btn) => {
-    const input = document.getElementById('input-cover-url');
+    const urlInput = document.getElementById('input-cover-url');
+    const fileInput = document.getElementById('input-cover-file');
+
+    urlInput.classList.add('hidden');
+    fileInput.classList.add('hidden');
+    urlInput.required = false;
+
     if (dataset.cover === 'custom') {
-      input.classList.remove('hidden');
-      input.required = true;
-    } else {
-      input.classList.add('hidden');
-      input.required = false;
+      urlInput.classList.remove('hidden');
+      urlInput.required = true;
+    } else if (dataset.cover === 'file') {
+      fileInput.classList.remove('hidden');
     }
   });
 
   setupToggle('.options button[data-bg]', (dataset, btn) => {
-    const input = document.getElementById('input-bg-url');
-    if (dataset.bg !== 'default') {
-      input.classList.remove('hidden');
-      input.required = true;
-      input.placeholder = dataset.bg === 'custom-video' ? 'https://example.com/video.mp4' : 'https://example.com/image.jpg';
-    } else {
-      input.classList.add('hidden');
-      input.required = false;
+    const urlInput = document.getElementById('input-bg-url');
+    const fileInput = document.getElementById('input-bg-file');
+
+    urlInput.classList.add('hidden');
+    fileInput.classList.add('hidden');
+    urlInput.required = false;
+
+    if (dataset.bg !== 'default' && dataset.bg !== 'file') {
+      urlInput.classList.remove('hidden');
+      urlInput.required = true;
+      urlInput.placeholder = dataset.bg === 'custom-video' ? 'https://example.com/video.mp4' : 'https://example.com/image.jpg';
+    } else if (dataset.bg === 'file') {
+      fileInput.classList.remove('hidden');
     }
   });
 
   // Generate Link
   document.getElementById('creator-form').addEventListener('submit', (e) => {
     e.preventDefault();
-    const link = generateLink();
+    const config = getFormValues();
+    const link = generateLink(config);
     const resultArea = document.getElementById('result-area');
     const shareInput = document.getElementById('share-link');
     const openBtn = document.getElementById('open-link-btn');
+    const warning = document.getElementById('share-warning');
+
+    // Show warning if local files are used
+    if (config.coverIsFile || config.bgIsFile) {
+      warning.classList.remove('hidden');
+    } else {
+      warning.classList.add('hidden');
+    }
 
     shareInput.value = link;
     openBtn.href = link;
@@ -86,7 +105,7 @@ function initCreator() {
     const config = getFormValues();
     isPreview = true;
     initViewer(config);
-    // Add back button for preview
+
     const backBtn = document.createElement('button');
     backBtn.innerText = '✏️ Retourner à l\'édition';
     backBtn.style.position = 'absolute';
@@ -101,7 +120,12 @@ function initCreator() {
     backBtn.id = 'preview-back-btn';
 
     backBtn.addEventListener('click', () => {
-      location.reload(); // Simple reload to clear state or we could toggle views
+      viewerApp.classList.add('hidden');
+      creatorApp.classList.remove('hidden');
+      backBtn.remove();
+      // Stop video if playing
+      const video = viewerBgContainer.querySelector('video');
+      if (video) video.pause();
     });
     viewerApp.appendChild(backBtn);
   });
@@ -122,24 +146,53 @@ function getFormValues() {
   const msg = document.getElementById('input-message').value || DEFAULTS.msg;
 
   // Cover
-  const coverType = document.querySelector('.options button[data-cover].active').dataset.cover;
-  const coverUrl = coverType === 'custom' ? document.getElementById('input-cover-url').value : DEFAULTS.cover;
+  const coverBtn = document.querySelector('.options button[data-cover].active');
+  const coverType = coverBtn.dataset.cover;
+  let coverUrl = DEFAULTS.cover;
+  let coverIsFile = false;
+
+  if (coverType === 'custom') {
+    coverUrl = document.getElementById('input-cover-url').value;
+  } else if (coverType === 'file') {
+    const file = document.getElementById('input-cover-file').files[0];
+    if (file) {
+      coverUrl = URL.createObjectURL(file);
+      coverIsFile = true;
+    }
+  }
 
   // Background
   const bgBtn = document.querySelector('.options button[data-bg].active');
-  const bgType = bgBtn.dataset.bg === 'custom-video' ? 'video' : 'image';
-  const bgUrl = bgBtn.dataset.bg === 'default' ? DEFAULTS.bg : document.getElementById('input-bg-url').value;
+  let bgType = bgBtn.dataset.bg === 'custom-video' ? 'video' : 'image';
+  let bgUrl = DEFAULTS.bg;
+  let bgIsFile = false;
 
-  return { msg, cover: coverUrl, bg: bgUrl, bgType };
+  if (bgBtn.dataset.bg === 'file') {
+    const file = document.getElementById('input-bg-file').files[0];
+    if (file) {
+      bgUrl = URL.createObjectURL(file);
+      bgIsFile = true;
+      bgType = file.type.startsWith('video') ? 'video' : 'image';
+    }
+  } else if (bgBtn.dataset.bg !== 'default') {
+    bgUrl = document.getElementById('input-bg-url').value;
+  }
+
+  return { msg, cover: coverUrl, bg: bgUrl, bgType, coverIsFile, bgIsFile };
 }
 
-function generateLink() {
-  const config = getFormValues();
+function generateLink(config) {
   const params = new URLSearchParams();
   params.set('msg', config.msg);
-  if (config.cover !== DEFAULTS.cover) params.set('cover', config.cover);
-  if (config.bg !== DEFAULTS.bg) params.set('bg', config.bg);
-  if (config.bgType !== 'image') params.set('bgType', config.bgType);
+
+  // Only add if not default AND not a local file
+  if (!config.coverIsFile && config.cover !== DEFAULTS.cover) {
+    params.set('cover', config.cover);
+  }
+  if (!config.bgIsFile && config.bg !== DEFAULTS.bg) {
+    params.set('bg', config.bg);
+    if (config.bgType !== 'image') params.set('bgType', config.bgType);
+  }
 
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }

@@ -31,9 +31,11 @@
             <label>2. Image à Gratter (Couverture)</label>
             <div class="options">
               <button type="button" class="option-btn active" data-cover="default">Or & Cœurs</button>
-              <button type="button" class="option-btn" data-cover="custom">Lien Personnalisé</button>
+              <button type="button" class="option-btn" data-cover="custom">Lien URL</button>
+              <button type="button" class="option-btn" data-cover="file">Fichier Local</button>
             </div>
             <input type="url" id="input-cover-url" placeholder="https://..." class="hidden">
+            <input type="file" id="input-cover-file" accept="image/*" class="hidden file-input">
           </div>
 
           <div class="input-group">
@@ -42,8 +44,10 @@
               <button type="button" class="option-btn active" data-bg="default">Romantique</button>
               <button type="button" class="option-btn" data-bg="custom-img">Photo (URL)</button>
               <button type="button" class="option-btn" data-bg="custom-video">Vidéo (URL)</button>
+              <button type="button" class="option-btn" data-bg="file">Importer Fichier</button>
             </div>
             <input type="url" id="input-bg-url" placeholder="https://..." class="hidden">
+            <input type="file" id="input-bg-file" accept="image/*,video/*" class="hidden file-input">
           </div>
 
           <div class="actions">
@@ -54,6 +58,10 @@
 
         <div id="result-area" class="hidden">
           <div class="divider"></div>
+          <div id="share-warning" class="warning-box hidden">
+            ⚠️ Attention : Les fichiers importés localement ne peuvent pas être partagés par lien. Utilisez des liens
+            URL pour un partage complet.
+          </div>
           <h3>Votre lien est prêt !</h3>
           <div class="link-box">
             <input type="text" id="share-link" readonly>
