@@ -33,12 +33,6 @@ function initCreator() {
   creatorApp.classList.remove('hidden');
   viewerApp.classList.add('hidden');
 
-  // Load API Key (Optional for some, but Catbox is anonymous)
-  // We keep the settings panel for future flexibility or other services
-  settingsBtn.addEventListener('click', () => {
-    settingsPanel.classList.toggle('hidden');
-  });
-
   // Input Toggles
   setupToggle('.options button[data-cover]', (dataset, btn) => {
     const urlInput = document.getElementById('input-cover-url');
