@@ -178,10 +178,12 @@ async function uploadToCatbox(file) {
   formData.append('fileToUpload', file);
 
   // Note: Catbox has CORS limits. We use a proxy to ensure it works from any domain.
-  const proxyUrl = 'https://corsproxy.io/?';
+  // Try CodeTabs proxy which generally supports POST
+  const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
   const targetUrl = 'https://catbox.moe/user/api.php';
 
-  const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+  // We don't need encodeURIComponent for codetabs target usually, but let's be safe
+  const response = await fetch(proxyUrl + targetUrl, {
     method: 'POST',
     body: formData
   });
