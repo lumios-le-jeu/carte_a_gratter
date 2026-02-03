@@ -33,6 +33,21 @@ function initCreator() {
   creatorApp.classList.remove('hidden');
   viewerApp.classList.add('hidden');
 
+  // Settings Panel
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsPanel = document.getElementById('settings-panel');
+  const apiKeyInput = document.getElementById('api-key');
+
+  // Load API Key
+  apiKeyInput.value = localStorage.getItem('imgbb_api_key') || '';
+  apiKeyInput.addEventListener('input', (e) => {
+    localStorage.setItem('imgbb_api_key', e.target.value);
+  });
+
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('hidden');
+  });
+
   // Input Toggles
   setupToggle('.options button[data-cover]', (dataset, btn) => {
     const urlInput = document.getElementById('input-cover-url');
@@ -73,18 +88,25 @@ function initCreator() {
     if (!file) return;
 
     const status = document.getElementById('cover-upload-status');
+    const apiKey = localStorage.getItem('imgbb_api_key');
+
+    if (!apiKey) {
+      status.innerHTML = '❌ Erreur: <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'settings-panel\').classList.remove(\'hidden\')">Donnez une clé API</span>';
+      status.className = 'upload-status error';
+      return;
+    }
 
     try {
-      status.innerText = '⏳ Téléchargement sécurisé...';
+      status.innerText = '⏳ Téléchargement vers ImgBB...';
       status.className = 'upload-status loading';
-      const url = await uploadToCatbox(file);
+      const url = await uploadToImgBB(file, apiKey);
       status.innerText = '✅ Prêt ! Fichier hébergé.';
       status.className = 'upload-status success';
+      // Store for getFormValues
       e.target.dataset.uploadedUrl = url;
     } catch (err) {
-      status.innerText = '❌ Erreur : ' + err.message;
+      status.innerText = '❌ Erreur lors de l\'envoi : ' + err.message;
       status.className = 'upload-status error';
-      console.error(err);
     }
   });
 
@@ -93,18 +115,30 @@ function initCreator() {
     if (!file) return;
 
     const status = document.getElementById('bg-upload-status');
+    const apiKey = localStorage.getItem('imgbb_api_key');
+
+    if (file.type.startsWith('video')) {
+      status.innerText = 'ℹ️ Vidéo : ImgBB ne supporte que les images. La vidéo sera lue localement.';
+      status.className = 'upload-status hint';
+      return;
+    }
+
+    if (!apiKey) {
+      status.innerHTML = '❌ Erreur: <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'settings-panel\').classList.remove(\'hidden\')">Donnez une clé API</span>';
+      status.className = 'upload-status error';
+      return;
+    }
 
     try {
-      status.innerText = '⏳ Téléchargement sécurisé...';
+      status.innerText = '⏳ Téléchargement vers ImgBB...';
       status.className = 'upload-status loading';
-      const url = await uploadToCatbox(file);
+      const url = await uploadToImgBB(file, apiKey);
       status.innerText = '✅ Prêt ! Fichier hébergé.';
       status.className = 'upload-status success';
       e.target.dataset.uploadedUrl = url;
     } catch (err) {
       status.innerText = '❌ Erreur : ' + err.message;
       status.className = 'upload-status error';
-      console.error(err);
     }
   });
 
@@ -118,7 +152,6 @@ function initCreator() {
     const openBtn = document.getElementById('open-link-btn');
     const warning = document.getElementById('share-warning');
 
-    // Show warning if local files are used
     if (config.coverIsFile || config.bgIsFile) {
       warning.classList.remove('hidden');
     } else {
@@ -172,26 +205,20 @@ function initCreator() {
   });
 }
 
-async function uploadToCatbox(file) {
+async function uploadToImgBB(file, apiKey) {
   const formData = new FormData();
-  formData.append('reqtype', 'fileupload');
-  formData.append('fileToUpload', file);
+  formData.append('image', file);
 
-  // Note: Catbox has CORS limits. We use a proxy to ensure it works from any domain.
-  // Try CodeTabs proxy which generally supports POST
-  const proxyUrl = 'https://api.codetabs.com/v1/proxy?quest=';
-  const targetUrl = 'https://catbox.moe/user/api.php';
-
-  // We don't need encodeURIComponent for codetabs target usually, but let's be safe
-  const response = await fetch(proxyUrl + targetUrl, {
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
     method: 'POST',
     body: formData
   });
 
-  if (response.ok) {
-    return await response.text();
+  const data = await response.json();
+  if (data.status === 200) {
+    return data.data.url;
   } else {
-    throw new Error('Le serveur d\'hébergement est indisponible.');
+    throw new Error(data.error?.message || 'Inconnu');
   }
 }
 
