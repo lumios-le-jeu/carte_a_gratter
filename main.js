@@ -141,8 +141,8 @@ function initCreator() {
 
 async function shortenURL(url) {
   try {
-    // Use allorigins proxy to bypass CORS for is.gd
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    // Use corsproxy.io to bypass CORS - more reliable than allorigins
+    const proxyUrl = 'https://corsproxy.io/?';
     const targetUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
 
     const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
