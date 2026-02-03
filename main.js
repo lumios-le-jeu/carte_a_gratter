@@ -33,112 +33,35 @@ function initCreator() {
   creatorApp.classList.remove('hidden');
   viewerApp.classList.add('hidden');
 
-  // Settings Panel
-  const settingsBtn = document.getElementById('settings-btn');
-  const settingsPanel = document.getElementById('settings-panel');
-  const apiKeyInput = document.getElementById('api-key');
-
-  // Load API Key
-  apiKeyInput.value = localStorage.getItem('imgbb_api_key') || '';
-  apiKeyInput.addEventListener('input', (e) => {
-    localStorage.setItem('imgbb_api_key', e.target.value);
-  });
-
-  settingsBtn.addEventListener('click', () => {
-    settingsPanel.classList.toggle('hidden');
-  });
-
   // Input Toggles
   setupToggle('.options button[data-cover]', (dataset, btn) => {
     const urlInput = document.getElementById('input-cover-url');
-    const fileContainer = document.getElementById('cover-file-container');
+    const urlHint = document.getElementById('cover-url-hint');
 
     urlInput.classList.add('hidden');
-    fileContainer.classList.add('hidden');
+    urlHint.classList.add('hidden');
     urlInput.required = false;
 
     if (dataset.cover === 'custom') {
       urlInput.classList.remove('hidden');
+      urlHint.classList.remove('hidden');
       urlInput.required = true;
-    } else if (dataset.cover === 'file') {
-      fileContainer.classList.remove('hidden');
     }
   });
 
   setupToggle('.options button[data-bg]', (dataset, btn) => {
     const urlInput = document.getElementById('input-bg-url');
-    const fileContainer = document.getElementById('bg-file-container');
+    const urlHint = document.getElementById('bg-url-hint');
 
     urlInput.classList.add('hidden');
-    fileContainer.classList.add('hidden');
+    urlHint.classList.add('hidden');
     urlInput.required = false;
 
-    if (dataset.bg !== 'default' && dataset.bg !== 'file') {
+    if (dataset.bg !== 'default') {
       urlInput.classList.remove('hidden');
+      urlHint.classList.remove('hidden');
       urlInput.required = true;
-      urlInput.placeholder = dataset.bg === 'custom-video' ? 'https://example.com/video.mp4' : 'https://example.com/image.jpg';
-    } else if (dataset.bg === 'file') {
-      fileContainer.classList.remove('hidden');
-    }
-  });
-
-  // Auto-Upload logic
-  document.getElementById('input-cover-file').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const status = document.getElementById('cover-upload-status');
-    const apiKey = localStorage.getItem('imgbb_api_key');
-
-    if (!apiKey) {
-      status.innerHTML = '❌ Erreur: <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'settings-panel\').classList.remove(\'hidden\')">Donnez une clé API</span>';
-      status.className = 'upload-status error';
-      return;
-    }
-
-    try {
-      status.innerText = '⏳ Téléchargement vers ImgBB...';
-      status.className = 'upload-status loading';
-      const url = await uploadToImgBB(file, apiKey);
-      status.innerText = '✅ Prêt ! Fichier hébergé.';
-      status.className = 'upload-status success';
-      // Store for getFormValues
-      e.target.dataset.uploadedUrl = url;
-    } catch (err) {
-      status.innerText = '❌ Erreur lors de l\'envoi : ' + err.message;
-      status.className = 'upload-status error';
-    }
-  });
-
-  document.getElementById('input-bg-file').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const status = document.getElementById('bg-upload-status');
-    const apiKey = localStorage.getItem('imgbb_api_key');
-
-    if (file.type.startsWith('video')) {
-      status.innerText = 'ℹ️ Vidéo : ImgBB ne supporte que les images. La vidéo sera lue localement.';
-      status.className = 'upload-status hint';
-      return;
-    }
-
-    if (!apiKey) {
-      status.innerHTML = '❌ Erreur: <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'settings-panel\').classList.remove(\'hidden\')">Donnez une clé API</span>';
-      status.className = 'upload-status error';
-      return;
-    }
-
-    try {
-      status.innerText = '⏳ Téléchargement vers ImgBB...';
-      status.className = 'upload-status loading';
-      const url = await uploadToImgBB(file, apiKey);
-      status.innerText = '✅ Prêt ! Fichier hébergé.';
-      status.className = 'upload-status success';
-      e.target.dataset.uploadedUrl = url;
-    } catch (err) {
-      status.innerText = '❌ Erreur : ' + err.message;
-      status.className = 'upload-status error';
+      urlInput.placeholder = dataset.bg === 'custom-video' ? 'https://drive.google.com/file/d/... (vidéo)' : 'https://drive.google.com/file/d/... (image)';
     }
   });
 
@@ -152,11 +75,8 @@ function initCreator() {
     const openBtn = document.getElementById('open-link-btn');
     const warning = document.getElementById('share-warning');
 
-    if (config.coverIsFile || config.bgIsFile) {
-      warning.classList.remove('hidden');
-    } else {
-      warning.classList.add('hidden');
-    }
+    // No warnings needed anymore since no local files
+    warning.classList.add('hidden');
 
     shareInput.value = link;
     openBtn.href = link;
@@ -205,23 +125,6 @@ function initCreator() {
   });
 }
 
-async function uploadToImgBB(file, apiKey) {
-  const formData = new FormData();
-  formData.append('image', file);
-
-  const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-    method: 'POST',
-    body: formData
-  });
-
-  const data = await response.json();
-  if (data.status === 200) {
-    return data.data.url;
-  } else {
-    throw new Error(data.error?.message || 'Inconnu');
-  }
-}
-
 function setupToggle(selector, callback) {
   const btns = document.querySelectorAll(selector);
   btns.forEach(btn => {
@@ -240,53 +143,32 @@ function getFormValues() {
   const coverBtn = document.querySelector('.options button[data-cover].active');
   const coverType = coverBtn.dataset.cover;
   let coverUrl = DEFAULTS.cover;
-  let coverIsFile = false;
 
   if (coverType === 'custom') {
     coverUrl = document.getElementById('input-cover-url').value;
-  } else if (coverType === 'file') {
-    const fileInput = document.getElementById('input-cover-file');
-    // Priority to uploaded URL if exists
-    if (fileInput.dataset.uploadedUrl) {
-      coverUrl = fileInput.dataset.uploadedUrl;
-    } else if (fileInput.files[0]) {
-      coverUrl = URL.createObjectURL(fileInput.files[0]);
-      coverIsFile = true;
-    }
   }
 
   // Background
   const bgBtn = document.querySelector('.options button[data-bg].active');
   let bgType = bgBtn.dataset.bg === 'custom-video' ? 'video' : 'image';
   let bgUrl = DEFAULTS.bg;
-  let bgIsFile = false;
 
-  if (bgBtn.dataset.bg === 'file') {
-    const fileInput = document.getElementById('input-bg-file');
-    if (fileInput.dataset.uploadedUrl) {
-      bgUrl = fileInput.dataset.uploadedUrl;
-      bgType = 'image';
-    } else if (fileInput.files[0]) {
-      bgUrl = URL.createObjectURL(fileInput.files[0]);
-      bgIsFile = true;
-      bgType = fileInput.files[0].type.startsWith('video') ? 'video' : 'image';
-    }
-  } else if (bgBtn.dataset.bg !== 'default') {
+  if (bgBtn.dataset.bg !== 'default') {
     bgUrl = document.getElementById('input-bg-url').value;
   }
 
-  return { msg, cover: coverUrl, bg: bgUrl, bgType, coverIsFile, bgIsFile };
+  return { msg, cover: coverUrl, bg: bgUrl, bgType };
 }
 
 function generateLink(config) {
   const params = new URLSearchParams();
   params.set('msg', config.msg);
 
-  // Only add if not default AND not a local file
-  if (!config.coverIsFile && config.cover !== DEFAULTS.cover) {
+  // Only add if not default
+  if (config.cover !== DEFAULTS.cover) {
     params.set('cover', config.cover);
   }
-  if (!config.bgIsFile && config.bg !== DEFAULTS.bg) {
+  if (config.bg !== DEFAULTS.bg) {
     params.set('bg', config.bg);
     if (config.bgType !== 'image') params.set('bgType', config.bgType);
   }

@@ -18,12 +18,6 @@
     <!-- CREATOR INTERFACE -->
     <div id="creator-app" class="fade-in">
       <div class="glass-panel">
-        <div class="settings-toggle" id="settings-btn">⚙️ Hébergement</div>
-        <div id="settings-panel" class="hidden glass-inner">
-          <label>Clé API ImgBB (Gratuit sur <a href="https://api.imgbb.com/" target="_blank">imgbb.com</a>)</label>
-          <input type="password" id="api-key" placeholder="Collez votre clé ici...">
-          <p class="hint">Nécessaire uniquement si vous voulez que vos fichiers soient accessibles par lien.</p>
-        </div>
 
         <h1>✨ Créez votre Carte Magique</h1>
         <p class="subtitle">Offrez une surprise inoubliable avec une carte à gratter personnalisée.</p>
@@ -39,13 +33,11 @@
             <div class="options">
               <button type="button" class="option-btn active" data-cover="default">Or & Cœurs</button>
               <button type="button" class="option-btn" data-cover="custom">Lien URL</button>
-              <button type="button" class="option-btn" data-cover="file">Fichier Local</button>
             </div>
-            <input type="url" id="input-cover-url" placeholder="https://..." class="hidden">
-            <div id="cover-file-container" class="hidden">
-              <input type="file" id="input-cover-file" accept="image/*" class="file-input">
-              <div id="cover-upload-status" class="upload-status"></div>
-            </div>
+            <input type="url" id="input-cover-url" placeholder="https://drive.google.com/file/d/... ou autre"
+              class="hidden">
+            <p class="hint hidden" id="cover-url-hint">💡 Assurez-vous que votre fichier est partagé en <strong>accès
+                public (Lecteur)</strong> sur Google Drive, Google Photos ou Amazon Photos.</p>
           </div>
 
           <div class="input-group">
@@ -54,13 +46,11 @@
               <button type="button" class="option-btn active" data-bg="default">Romantique</button>
               <button type="button" class="option-btn" data-bg="custom-img">Photo (URL)</button>
               <button type="button" class="option-btn" data-bg="custom-video">Vidéo (URL)</button>
-              <button type="button" class="option-btn" data-bg="file">Importer Fichier</button>
             </div>
-            <input type="url" id="input-bg-url" placeholder="https://..." class="hidden">
-            <div id="bg-file-container" class="hidden">
-              <input type="file" id="input-bg-file" accept="image/*,video/*" class="file-input">
-              <div id="bg-upload-status" class="upload-status"></div>
-            </div>
+            <input type="url" id="input-bg-url" placeholder="https://drive.google.com/file/d/... ou autre"
+              class="hidden">
+            <p class="hint hidden" id="bg-url-hint">💡 Assurez-vous que votre fichier est partagé en <strong>accès
+                public (Lecteur)</strong> sur Google Drive, Google Photos ou Amazon Photos.</p>
           </div>
 
           <div class="actions">
