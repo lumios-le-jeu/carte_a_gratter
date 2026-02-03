@@ -140,40 +140,21 @@ function initCreator() {
 }
 
 async function shortenURL(url) {
-  const targetUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
+  try {
+    // Original implementation: is.gd via api.allorigins.win/raw
+    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    const targetUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
 
-  // Test multiple proxy services in order of reliability
-  const proxies = [
-    (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, // Plan A (JSON wrapper)
-    (u) => `https://api.codetabs.com/v1/proxy?url=${encodeURIComponent(u)}`, // Plan B
-    (u) => `https://corsproxy.io/?${encodeURIComponent(u)}` // Plan C
-  ];
-
-  for (const getProxyUrl of proxies) {
-    try {
-      const pUrl = getProxyUrl(targetUrl);
-      const response = await fetch(pUrl);
-
-      if (response.ok) {
-        let shortUrl;
-        if (pUrl.includes('allorigins.win')) {
-          const data = await response.json();
-          shortUrl = data.contents;
-        } else {
-          shortUrl = await response.text();
-        }
-
-        if (shortUrl && shortUrl.startsWith('https://is.gd/')) {
-          console.log("URL shortened successfully via proxy");
-          return shortUrl.trim();
-        }
+    const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+    if (response.ok) {
+      const shortUrl = await response.text();
+      if (shortUrl.startsWith('https://is.gd/')) {
+        return shortUrl.trim();
       }
-    } catch (err) {
-      console.warn('Proxy failed, trying next...', err);
     }
+  } catch (err) {
+    console.warn('URL shortening failed:', err);
   }
-
-  console.error("All shortening proxies failed");
   return url;
 }
 
