@@ -33,29 +33,44 @@ function initCreator() {
   creatorApp.classList.remove('hidden');
   viewerApp.classList.add('hidden');
 
+  // Settings Panel
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsPanel = document.getElementById('settings-panel');
+  const apiKeyInput = document.getElementById('api-key');
+
+  // Load API Key
+  apiKeyInput.value = localStorage.getItem('imgbb_api_key') || '';
+  apiKeyInput.addEventListener('input', (e) => {
+    localStorage.setItem('imgbb_api_key', e.target.value);
+  });
+
+  settingsBtn.addEventListener('click', () => {
+    settingsPanel.classList.toggle('hidden');
+  });
+
   // Input Toggles
   setupToggle('.options button[data-cover]', (dataset, btn) => {
     const urlInput = document.getElementById('input-cover-url');
-    const fileInput = document.getElementById('input-cover-file');
+    const fileContainer = document.getElementById('cover-file-container');
 
     urlInput.classList.add('hidden');
-    fileInput.classList.add('hidden');
+    fileContainer.classList.add('hidden');
     urlInput.required = false;
 
     if (dataset.cover === 'custom') {
       urlInput.classList.remove('hidden');
       urlInput.required = true;
     } else if (dataset.cover === 'file') {
-      fileInput.classList.remove('hidden');
+      fileContainer.classList.remove('hidden');
     }
   });
 
   setupToggle('.options button[data-bg]', (dataset, btn) => {
     const urlInput = document.getElementById('input-bg-url');
-    const fileInput = document.getElementById('input-bg-file');
+    const fileContainer = document.getElementById('bg-file-container');
 
     urlInput.classList.add('hidden');
-    fileInput.classList.add('hidden');
+    fileContainer.classList.add('hidden');
     urlInput.required = false;
 
     if (dataset.bg !== 'default' && dataset.bg !== 'file') {
@@ -63,7 +78,67 @@ function initCreator() {
       urlInput.required = true;
       urlInput.placeholder = dataset.bg === 'custom-video' ? 'https://example.com/video.mp4' : 'https://example.com/image.jpg';
     } else if (dataset.bg === 'file') {
-      fileInput.classList.remove('hidden');
+      fileContainer.classList.remove('hidden');
+    }
+  });
+
+  // Auto-Upload logic
+  document.getElementById('input-cover-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const status = document.getElementById('cover-upload-status');
+    const apiKey = localStorage.getItem('imgbb_api_key');
+
+    if (!apiKey) {
+      status.innerHTML = '❌ Erreur: <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'settings-panel\').classList.remove(\'hidden\')">Donnez une clé API</span>';
+      status.className = 'upload-status error';
+      return;
+    }
+
+    try {
+      status.innerText = '⏳ Téléchargement vers ImgBB...';
+      status.className = 'upload-status loading';
+      const url = await uploadToImgBB(file, apiKey);
+      status.innerText = '✅ Prêt ! Fichier hébergé.';
+      status.className = 'upload-status success';
+      // Store for getFormValues
+      e.target.dataset.uploadedUrl = url;
+    } catch (err) {
+      status.innerText = '❌ Erreur lors de l\'envoi : ' + err.message;
+      status.className = 'upload-status error';
+    }
+  });
+
+  document.getElementById('input-bg-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const status = document.getElementById('bg-upload-status');
+    const apiKey = localStorage.getItem('imgbb_api_key');
+
+    if (file.type.startsWith('video')) {
+      status.innerText = 'ℹ️ Vidéo : ImgBB ne supporte que les images. La vidéo sera lue localement.';
+      status.className = 'upload-status hint';
+      return;
+    }
+
+    if (!apiKey) {
+      status.innerHTML = '❌ Erreur: <span style="cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'settings-panel\').classList.remove(\'hidden\')">Donnez une clé API</span>';
+      status.className = 'upload-status error';
+      return;
+    }
+
+    try {
+      status.innerText = '⏳ Téléchargement vers ImgBB...';
+      status.className = 'upload-status loading';
+      const url = await uploadToImgBB(file, apiKey);
+      status.innerText = '✅ Prêt ! Fichier hébergé.';
+      status.className = 'upload-status success';
+      e.target.dataset.uploadedUrl = url;
+    } catch (err) {
+      status.innerText = '❌ Erreur : ' + err.message;
+      status.className = 'upload-status error';
     }
   });
 
@@ -131,6 +206,23 @@ function initCreator() {
   });
 }
 
+async function uploadToImgBB(file, apiKey) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await response.json();
+  if (data.status === 200) {
+    return data.data.url;
+  } else {
+    throw new Error(data.error?.message || 'Inconnu');
+  }
+}
+
 function setupToggle(selector, callback) {
   const btns = document.querySelectorAll(selector);
   btns.forEach(btn => {
@@ -154,9 +246,12 @@ function getFormValues() {
   if (coverType === 'custom') {
     coverUrl = document.getElementById('input-cover-url').value;
   } else if (coverType === 'file') {
-    const file = document.getElementById('input-cover-file').files[0];
-    if (file) {
-      coverUrl = URL.createObjectURL(file);
+    const fileInput = document.getElementById('input-cover-file');
+    // Priority to uploaded URL if exists
+    if (fileInput.dataset.uploadedUrl) {
+      coverUrl = fileInput.dataset.uploadedUrl;
+    } else if (fileInput.files[0]) {
+      coverUrl = URL.createObjectURL(fileInput.files[0]);
       coverIsFile = true;
     }
   }
@@ -168,11 +263,14 @@ function getFormValues() {
   let bgIsFile = false;
 
   if (bgBtn.dataset.bg === 'file') {
-    const file = document.getElementById('input-bg-file').files[0];
-    if (file) {
-      bgUrl = URL.createObjectURL(file);
+    const fileInput = document.getElementById('input-bg-file');
+    if (fileInput.dataset.uploadedUrl) {
+      bgUrl = fileInput.dataset.uploadedUrl;
+      bgType = 'image';
+    } else if (fileInput.files[0]) {
+      bgUrl = URL.createObjectURL(fileInput.files[0]);
       bgIsFile = true;
-      bgType = file.type.startsWith('video') ? 'video' : 'image';
+      bgType = fileInput.files[0].type.startsWith('video') ? 'video' : 'image';
     }
   } else if (bgBtn.dataset.bg !== 'default') {
     bgUrl = document.getElementById('input-bg-url').value;

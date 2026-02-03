@@ -44,6 +44,60 @@ body {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Configuration Panel */
+.settings-toggle {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: 100;
+  transition: color 0.3s;
+}
+
+.settings-toggle:hover {
+  color: white;
+}
+
+.glass-inner {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  border: 1px solid var(--glass-border);
+}
+
+.glass-inner label {
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+
+.hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.upload-status {
+  font-size: 0.75rem;
+  margin-top: 5px;
+  min-height: 1em;
+}
+
+.upload-status.loading {
+  color: #fbc2eb;
+}
+
+.upload-status.success {
+  color: var(--secondary);
+}
+
+.upload-status.error {
+  color: var(--primary);
+}
+
 h1 {
   font-family: 'Playfair Display', serif;
   font-size: 2rem;
@@ -51,6 +105,8 @@ h1 {
   text-align: center;
   background: linear-gradient(to right, #fff, #fbc2eb);
   -webkit-background-clip: text;
+  background-clip: text;
+  /* Fixed lint error */
   -webkit-text-fill-color: transparent;
 }
 
