@@ -239,8 +239,8 @@ function initViewer(config) {
     if (driveMatch) {
       const fileId = driveMatch[1];
       if (isVideo) {
-        // Video needs the download/view stream, thumbnail API only returns images
-        return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        // Alternative video stream URL for Drive
+        return `https://drive.google.com/uc?id=${fileId}&export=download`;
       }
       // Try thumbnail API which is more CORS-friendly for images
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w4000`;
@@ -274,6 +274,14 @@ function initViewer(config) {
     mediaEl.muted = true; // Essential for autoplay
     mediaEl.playsInline = true;
 
+    // Retry with proxy if video fails to load
+    mediaEl.onerror = () => {
+      if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
+        console.warn("Video load failed, retrying with proxy...");
+        mediaEl.src = maybeProxy(finalBg);
+      }
+    };
+
     // Force volume to 1 only after user starts scratching (interaction)
     mediaEl.volume = 1;
 
@@ -283,6 +291,11 @@ function initViewer(config) {
     // Check if it's a video file pretending to be an image (from drive?) -> No easy way to know, assume image
     mediaEl = document.createElement('img');
     mediaEl.src = finalBg;
+    mediaEl.onerror = () => {
+      if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
+        mediaEl.src = maybeProxy(finalBg);
+      }
+    };
   }
   viewerBgContainer.appendChild(mediaEl);
 
@@ -315,10 +328,7 @@ function initViewer(config) {
       } else {
         console.error("Failed to load cover image completely");
         loadingIndicator.classList.add('hidden');
-        // Draw distinct fallback
-        ctx.fillStyle = '#C0C0C0';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Still init canvas so user can play (reveal background) even if cover failed
+        // Init with null to use canvas internal fallback
         initCanvas(null, mediaEl);
       }
     };
