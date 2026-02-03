@@ -6,7 +6,6 @@ const DEFAULTS = {
   cover: `${BASE_URL}scratch_cover.png`,
   bg: `${BASE_URL}demo_background.png`, // Ensure these are in /public
   msg: 'Joyeux Saint-Valentin ! ❤️',
-  bgType: 'image'
 };
 
 // State
@@ -61,7 +60,7 @@ function initCreator() {
       urlInput.classList.remove('hidden');
       urlHint.classList.remove('hidden');
       urlInput.required = true;
-      urlInput.placeholder = dataset.bg === 'custom-video' ? 'https://drive.google.com/file/d/... (vidéo)' : 'https://drive.google.com/file/d/... (image)';
+      urlInput.placeholder = 'https://drive.google.com/file/d/... (image)';
     }
   });
 
@@ -135,9 +134,6 @@ function initCreator() {
       viewerApp.classList.add('hidden');
       creatorApp.classList.remove('hidden');
       backBtn.remove();
-      // Stop video if playing
-      const video = viewerBgContainer.querySelector('video');
-      if (video) video.pause();
     });
     viewerApp.appendChild(backBtn);
   });
@@ -187,14 +183,13 @@ function getFormValues() {
 
   // Background
   const bgBtn = document.querySelector('.options button[data-bg].active');
-  let bgType = bgBtn.dataset.bg === 'custom-video' ? 'video' : 'image';
   let bgUrl = DEFAULTS.bg;
 
   if (bgBtn.dataset.bg !== 'default') {
     bgUrl = document.getElementById('input-bg-url').value;
   }
 
-  return { msg, cover: coverUrl, bg: bgUrl, bgType };
+  return { msg, cover: coverUrl, bg: bgUrl };
 }
 
 function generateLink(config) {
@@ -207,7 +202,6 @@ function generateLink(config) {
   }
   if (config.bg !== DEFAULTS.bg) {
     params.set('bg', config.bg);
-    if (config.bgType !== 'image') params.set('bgType', config.bgType);
   }
 
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
@@ -222,7 +216,6 @@ function initViewer(config) {
   const msg = config.msg || DEFAULTS.msg;
   const cover = config.cover || DEFAULTS.cover;
   const bg = config.bg || DEFAULTS.bg;
-  const bgType = config.bgType || 'image';
 
   // 1. Setup Text
   viewerText.innerText = msg;
@@ -231,17 +224,13 @@ function initViewer(config) {
   viewerBgContainer.innerHTML = '';
 
   // Convert Drive Link if needed - try multiple formats
-  const normalizeUrl = (url, isVideo = false) => {
+  const normalizeUrl = (url) => {
     if (!url) return '';
 
     // Google Drive - extract ID
     const driveMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([-_\w]+)/);
     if (driveMatch) {
       const fileId = driveMatch[1];
-      if (isVideo) {
-        // Alternative video stream URL for Drive
-        return `https://drive.google.com/uc?id=${fileId}&export=download`;
-      }
       // Try thumbnail API which is more CORS-friendly for images
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w4000`;
     }
@@ -259,44 +248,17 @@ function initViewer(config) {
     return url;
   };
 
-  const finalBg = normalizeUrl(bg, bgType === 'video');
-  const finalCover = normalizeUrl(cover, false);
+  const finalBg = normalizeUrl(bg);
+  const finalCover = normalizeUrl(cover);
 
-  let mediaEl;
-  if (bgType === 'video') {
-    mediaEl = document.createElement('video');
-    mediaEl.setAttribute('autoplay', '');
-    mediaEl.setAttribute('muted', ''); // Essential for autoplay
-    mediaEl.setAttribute('loop', '');
-    mediaEl.setAttribute('playsinline', '');
-    mediaEl.src = finalBg;
-    mediaEl.loop = true;
-    mediaEl.muted = true; // Essential for autoplay
-    mediaEl.playsInline = true;
-
-    // Retry with proxy if video fails to load
-    mediaEl.onerror = () => {
-      if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
-        console.warn("Video load failed, retrying with proxy...");
-        mediaEl.src = maybeProxy(finalBg);
-      }
-    };
-
-    // Force volume to 1 only after user starts scratching (interaction)
-    mediaEl.volume = 1;
-
-    // Important: if it's a Drive video, we might need to handle the source differently
-    // but src should work if export=download is used.
-  } else {
-    // Check if it's a video file pretending to be an image (from drive?) -> No easy way to know, assume image
-    mediaEl = document.createElement('img');
-    mediaEl.src = finalBg;
-    mediaEl.onerror = () => {
-      if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
-        mediaEl.src = maybeProxy(finalBg);
-      }
-    };
-  }
+  const mediaEl = document.createElement('img');
+  mediaEl.src = finalBg;
+  mediaEl.onerror = () => {
+    if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
+      console.warn("Image load failed, retrying with proxy...");
+      mediaEl.src = maybeProxy(finalBg);
+    }
+  };
   viewerBgContainer.appendChild(mediaEl);
 
   // 3. Setup Scratch Canvas - with proxy retry
@@ -375,7 +337,6 @@ function initCanvas(coverImg, mediaEl) {
 
   // Scratch Logic
   let isDrawing = false;
-  let videoStarted = false;
   const SCRATCH_RADIUS = 35;
 
   const getPos = (e) => {
@@ -391,12 +352,6 @@ function initCanvas(coverImg, mediaEl) {
     ctx.beginPath();
     ctx.arc(x, y, SCRATCH_RADIUS, 0, 2 * Math.PI);
     ctx.fill();
-
-    // Start video/audio on first scratch interaction
-    if (!videoStarted && mediaEl.tagName === 'VIDEO') {
-      mediaEl.play().catch(err => console.log("Video play locked", err));
-      videoStarted = true;
-    }
 
     // Hide hint
     const hint = document.querySelector('.scratch-hint');
