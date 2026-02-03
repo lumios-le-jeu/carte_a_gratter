@@ -1,9 +1,10 @@
 import './style.css';
 
 // Default Assets
+const BASE_URL = import.meta.env.BASE_URL || '/';
 const DEFAULTS = {
-  cover: '/scratch_cover.png',
-  bg: '/demo_background.png', // Ensure these are in /public
+  cover: `${BASE_URL}scratch_cover.png`,
+  bg: `${BASE_URL}demo_background.png`, // Ensure these are in /public
   msg: 'Joyeux Saint-Valentin ! ❤️',
   bgType: 'image'
 };
@@ -63,7 +64,7 @@ function initCreator() {
     const resultArea = document.getElementById('result-area');
     const shareInput = document.getElementById('share-link');
     const openBtn = document.getElementById('open-link-btn');
-    
+
     shareInput.value = link;
     openBtn.href = link;
     resultArea.classList.remove('hidden');
@@ -98,9 +99,9 @@ function initCreator() {
     backBtn.style.borderRadius = '30px';
     backBtn.style.cursor = 'pointer';
     backBtn.id = 'preview-back-btn';
-    
+
     backBtn.addEventListener('click', () => {
-        location.reload(); // Simple reload to clear state or we could toggle views
+      location.reload(); // Simple reload to clear state or we could toggle views
     });
     viewerApp.appendChild(backBtn);
   });
@@ -119,7 +120,7 @@ function setupToggle(selector, callback) {
 
 function getFormValues() {
   const msg = document.getElementById('input-message').value || DEFAULTS.msg;
-  
+
   // Cover
   const coverType = document.querySelector('.options button[data-cover].active').dataset.cover;
   const coverUrl = coverType === 'custom' ? document.getElementById('input-cover-url').value : DEFAULTS.cover;
@@ -139,7 +140,7 @@ function generateLink() {
   if (config.cover !== DEFAULTS.cover) params.set('cover', config.cover);
   if (config.bg !== DEFAULTS.bg) params.set('bg', config.bg);
   if (config.bgType !== 'image') params.set('bgType', config.bgType);
-  
+
   return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }
 
@@ -165,7 +166,7 @@ function initViewer(config) {
     mediaEl.src = bg;
     mediaEl.loop = true;
     mediaEl.muted = false; // Will need user interaction to play with sound
-    mediaEl.playsInline = true; 
+    mediaEl.playsInline = true;
     // Video autoplay policy usually requires mute. We'll try to play on scratch.
   } else {
     mediaEl = document.createElement('img');
@@ -177,18 +178,18 @@ function initViewer(config) {
   const img = new Image();
   img.crossOrigin = 'Anonymous'; // Important for external images
   img.src = cover;
-  
+
   img.onload = () => {
     initCanvas(img, mediaEl);
   };
-   // If image fails loading (e.g. CORS), maybe fallback?
-   img.onerror = () => {
+  // If image fails loading (e.g. CORS), maybe fallback?
+  img.onerror = () => {
     console.error("Failed to load cover image");
     // Draw distinct fallback
     ctx.fillStyle = '#C0C0C0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     initCanvas(null, mediaEl); // Pass null to skip drawImage re-call but init events
-   };
+  };
 }
 
 function initCanvas(coverImg, mediaEl) {
@@ -196,29 +197,29 @@ function initCanvas(coverImg, mediaEl) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     if (coverImg) {
-        // Draw image covering the canvas (cover fit)
-        const aspect = coverImg.width / coverImg.height;
-        const canvasAspect = canvas.width / canvas.height;
-        let drawW, drawH, startX, startY;
-        
-        if (aspect > canvasAspect) {
-            drawH = canvas.height;
-            drawW = drawH * aspect;
-            startX = (canvas.width - drawW) / 2;
-            startY = 0;
-        } else {
-            drawW = canvas.width;
-            drawH = drawW / aspect;
-            startX = 0;
-            startY = (canvas.height - drawH) / 2;
-        }
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.drawImage(coverImg, startX, startY, drawW, drawH);
+      // Draw image covering the canvas (cover fit)
+      const aspect = coverImg.width / coverImg.height;
+      const canvasAspect = canvas.width / canvas.height;
+      let drawW, drawH, startX, startY;
+
+      if (aspect > canvasAspect) {
+        drawH = canvas.height;
+        drawW = drawH * aspect;
+        startX = (canvas.width - drawW) / 2;
+        startY = 0;
+      } else {
+        drawW = canvas.width;
+        drawH = drawW / aspect;
+        startX = 0;
+        startY = (canvas.height - drawH) / 2;
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(coverImg, startX, startY, drawW, drawH);
     } else {
-        // Fallback fill
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#d4af37'; // Gold
-        ctx.fillRect(0,0, canvas.width, canvas.height);
+      // Fallback fill
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#d4af37'; // Gold
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
     // Prepare for scratching
     ctx.globalCompositeOperation = 'destination-out';
@@ -234,7 +235,7 @@ function initCanvas(coverImg, mediaEl) {
 
   const getPos = (e) => {
     if (e.touches && e.touches.length > 0) {
-        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
     return { x: e.clientX, y: e.clientY };
   };
@@ -248,13 +249,13 @@ function initCanvas(coverImg, mediaEl) {
 
     // Start video/audio on first scratch interaction
     if (!videoStarted && mediaEl.tagName === 'VIDEO') {
-        mediaEl.play().catch(err => console.log("Video play locked", err));
-        videoStarted = true;
+      mediaEl.play().catch(err => console.log("Video play locked", err));
+      videoStarted = true;
     }
-    
+
     // Hide hint
     const hint = document.querySelector('.scratch-hint');
-    if(hint) hint.classList.add('fade-out');
+    if (hint) hint.classList.add('fade-out');
   };
 
   const startScratch = (e) => {
@@ -269,16 +270,16 @@ function initCanvas(coverImg, mediaEl) {
   canvas.addEventListener('mousedown', startScratch);
   canvas.addEventListener('mousemove', scratch);
   canvas.addEventListener('mouseup', endScratch);
-  
+
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Prevent scroll
     startScratch(e);
   }, { passive: false });
-  
+
   canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
     scratch(e);
   }, { passive: false });
-  
+
   canvas.addEventListener('touchend', endScratch);
 }
