@@ -252,26 +252,31 @@ function initViewer(config) {
   const finalCover = normalizeUrl(cover);
 
   const mediaEl = document.createElement('img');
-  mediaEl.src = finalBg;
+  // Use proxy immediately for Drive to avoid console noise
+  const bgToLoad = finalBg.includes('drive.google.com') ? maybeProxy(finalBg) : finalBg;
+  mediaEl.src = bgToLoad;
+
   mediaEl.onerror = () => {
     if (!mediaEl.src.includes('allorigins') && finalBg.includes('drive.google.com')) {
-      console.warn("Image load failed, retrying with proxy...");
+      console.warn("Retry background with proxy...");
       mediaEl.src = maybeProxy(finalBg);
     }
   };
   viewerBgContainer.appendChild(mediaEl);
 
-  // 3. Setup Scratch Canvas - with proxy retry
+  // 3. Setup Scratch Canvas
   const loadingIndicator = document.getElementById('loading-indicator');
 
   const loadCover = (url, useProxy = false, useCors = true) => {
-    // Show loading indicator
     loadingIndicator.classList.remove('hidden');
 
     const img = new Image();
     if (useCors) img.crossOrigin = 'Anonymous';
 
-    const targetUrl = useProxy ? maybeProxy(url) : url;
+    // If it's Drive, use proxy by default on first try to avoid CORS console errors
+    const shouldProxy = useProxy || (url.includes('drive.google.com') && !useProxy);
+    const targetUrl = shouldProxy ? maybeProxy(url) : url;
+
     img.src = targetUrl;
 
     img.onload = () => {
@@ -280,17 +285,12 @@ function initViewer(config) {
     };
 
     img.onerror = () => {
-      if (!useProxy && url.includes('drive.google.com')) {
-        console.warn("Direct Drive load failed, trying with CORS proxy...");
-        // Don't hide loader, just retry
+      if (!shouldProxy && url.includes('drive.google.com')) {
         loadCover(url, true, useCors);
       } else if (useCors) {
-        console.warn("CORS load failed, retrying without CORS (Tainted mode)...");
-        loadCover(url, useProxy, false);
+        loadCover(url, shouldProxy, false);
       } else {
-        console.error("Failed to load cover image completely");
         loadingIndicator.classList.add('hidden');
-        // Init with null to use canvas internal fallback
         initCanvas(null, mediaEl);
       }
     };
