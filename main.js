@@ -310,36 +310,61 @@ function initViewer(config) {
 
   // 2. Setup Background
   viewerBgContainer.innerHTML = '';
+  // Convert Drive Link if needed
+  const normalizeUrl = (url) => {
+    if (!url) return '';
+    // Google Drive
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([-_\w]+)/);
+    if (driveMatch) {
+      return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+    }
+    return url;
+  };
+
+  const finalBg = normalizeUrl(bg);
+  const finalCover = normalizeUrl(cover);
+
   let mediaEl;
   if (bgType === 'video') {
     mediaEl = document.createElement('video');
-    mediaEl.src = bg;
+    mediaEl.src = finalBg;
     mediaEl.loop = true;
     mediaEl.muted = false; // Will need user interaction to play with sound
     mediaEl.playsInline = true;
     // Video autoplay policy usually requires mute. We'll try to play on scratch.
   } else {
+    // Check if it's a video file pretending to be an image (from drive?) -> No easy way to know, assume image
     mediaEl = document.createElement('img');
-    mediaEl.src = bg;
+    mediaEl.src = finalBg;
   }
   viewerBgContainer.appendChild(mediaEl);
 
   // 3. Setup Scratch Canvas
-  const img = new Image();
-  img.crossOrigin = 'Anonymous'; // Important for external images
-  img.src = cover;
+  const loadCover = (url, useCors = true) => {
+    const img = new Image();
+    if (useCors) img.crossOrigin = 'Anonymous';
+    img.src = url;
 
-  img.onload = () => {
-    initCanvas(img, mediaEl);
+    img.onload = () => {
+      initCanvas(img, mediaEl);
+    };
+
+    img.onerror = () => {
+      if (useCors) {
+        console.warn("CORS load failed, retrying without CORS (Tainted mode)...");
+        loadCover(url, false);
+      } else {
+        console.error("Failed to load cover image completely");
+        // Draw distinct fallback
+        ctx.fillStyle = '#C0C0C0';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Still init canvas so user can play (reveal background) even if cover failed
+        initCanvas(null, mediaEl);
+      }
+    };
   };
-  // If image fails loading (e.g. CORS), maybe fallback?
-  img.onerror = () => {
-    console.error("Failed to load cover image");
-    // Draw distinct fallback
-    ctx.fillStyle = '#C0C0C0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    initCanvas(null, mediaEl); // Pass null to skip drawImage re-call but init events
-  };
+
+  loadCover(finalCover, true);
 }
 
 function initCanvas(coverImg, mediaEl) {
