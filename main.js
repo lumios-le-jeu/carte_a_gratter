@@ -231,14 +231,18 @@ function initViewer(config) {
   viewerBgContainer.innerHTML = '';
 
   // Convert Drive Link if needed - try multiple formats
-  const normalizeUrl = (url) => {
+  const normalizeUrl = (url, isVideo = false) => {
     if (!url) return '';
 
     // Google Drive - extract ID
     const driveMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([-_\w]+)/);
     if (driveMatch) {
       const fileId = driveMatch[1];
-      // Try thumbnail API which is more CORS-friendly
+      if (isVideo) {
+        // Video needs the download/view stream, thumbnail API only returns images
+        return `https://drive.google.com/uc?export=download&id=${fileId}`;
+      }
+      // Try thumbnail API which is more CORS-friendly for images
       return `https://drive.google.com/thumbnail?id=${fileId}&sz=w4000`;
     }
 
@@ -255,17 +259,26 @@ function initViewer(config) {
     return url;
   };
 
-  const finalBg = normalizeUrl(bg);
-  const finalCover = normalizeUrl(cover);
+  const finalBg = normalizeUrl(bg, bgType === 'video');
+  const finalCover = normalizeUrl(cover, false);
 
   let mediaEl;
   if (bgType === 'video') {
     mediaEl = document.createElement('video');
+    mediaEl.setAttribute('autoplay', '');
+    mediaEl.setAttribute('muted', ''); // Essential for autoplay
+    mediaEl.setAttribute('loop', '');
+    mediaEl.setAttribute('playsinline', '');
     mediaEl.src = finalBg;
     mediaEl.loop = true;
-    mediaEl.muted = false; // Will need user interaction to play with sound
+    mediaEl.muted = true; // Essential for autoplay
     mediaEl.playsInline = true;
-    // Video autoplay policy usually requires mute. We'll try to play on scratch.
+
+    // Force volume to 1 only after user starts scratching (interaction)
+    mediaEl.volume = 1;
+
+    // Important: if it's a Drive video, we might need to handle the source differently
+    // but src should work if export=download is used.
   } else {
     // Check if it's a video file pretending to be an image (from drive?) -> No easy way to know, assume image
     mediaEl = document.createElement('img');
