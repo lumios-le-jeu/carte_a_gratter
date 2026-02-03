@@ -310,13 +310,28 @@ function initViewer(config) {
 
   // 2. Setup Background
   viewerBgContainer.innerHTML = '';
-  // Convert Drive Link if needed
+
+  // Convert Drive Link if needed - try multiple formats
   const normalizeUrl = (url) => {
     if (!url) return '';
-    // Google Drive
-    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([-_\w]+)/);
+
+    // Google Drive - extract ID
+    const driveMatch = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([-_\w]+)/);
     if (driveMatch) {
-      return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+      const fileId = driveMatch[1];
+      // Try thumbnail API which is more CORS-friendly
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w4000`;
+    }
+
+    return url;
+  };
+
+  // Proxy wrapper for stubborn URLs (like Drive)
+  const maybeProxy = (url) => {
+    // If it's a Drive URL, use a CORS proxy
+    if (url.includes('drive.google.com')) {
+      // Use allorigins which is more reliable for Drive
+      return `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
     }
     return url;
   };
@@ -339,20 +354,25 @@ function initViewer(config) {
   }
   viewerBgContainer.appendChild(mediaEl);
 
-  // 3. Setup Scratch Canvas
-  const loadCover = (url, useCors = true) => {
+  // 3. Setup Scratch Canvas - with proxy retry
+  const loadCover = (url, useProxy = false, useCors = true) => {
     const img = new Image();
     if (useCors) img.crossOrigin = 'Anonymous';
-    img.src = url;
+
+    const targetUrl = useProxy ? maybeProxy(url) : url;
+    img.src = targetUrl;
 
     img.onload = () => {
       initCanvas(img, mediaEl);
     };
 
     img.onerror = () => {
-      if (useCors) {
+      if (!useProxy && url.includes('drive.google.com')) {
+        console.warn("Direct Drive load failed, trying with CORS proxy...");
+        loadCover(url, true, useCors);
+      } else if (useCors) {
         console.warn("CORS load failed, retrying without CORS (Tainted mode)...");
-        loadCover(url, false);
+        loadCover(url, useProxy, false);
       } else {
         console.error("Failed to load cover image completely");
         // Draw distinct fallback
@@ -364,7 +384,7 @@ function initViewer(config) {
     };
   };
 
-  loadCover(finalCover, true);
+  loadCover(finalCover, false, true);
 }
 
 function initCanvas(coverImg, mediaEl) {
