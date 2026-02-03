@@ -281,8 +281,8 @@ button:hover {
   font-size: 3rem;
   font-weight: 700;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-  /* Let clicks pass through */
+  pointer-events: auto;
+  /* Allow clicking links */
 }
 
 #scratch-canvas {

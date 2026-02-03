@@ -354,9 +354,32 @@ function initCanvas(coverImg, mediaEl) {
     isDrawing = false;
   };
 
+  const checkScratchedPercentage = () => {
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const pixels = imageData.data;
+    let transparentPixels = 0;
+
+    for (let i = 3; i < pixels.length; i += 4) {
+      if (pixels[i] === 0) transparentPixels++;
+    }
+
+    const percentage = (transparentPixels / (pixels.length / 4)) * 100;
+    if (percentage > 25) {
+      // Reveal everything and make clickable
+      canvas.style.transition = 'opacity 1s';
+      canvas.style.opacity = '0';
+      setTimeout(() => {
+        canvas.style.pointerEvents = 'none';
+      }, 500);
+    }
+  };
+
   canvas.addEventListener('mousedown', startScratch);
   canvas.addEventListener('mousemove', scratch);
-  canvas.addEventListener('mouseup', endScratch);
+  canvas.addEventListener('mouseup', () => {
+    endScratch();
+    checkScratchedPercentage();
+  });
 
   canvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Prevent scroll
@@ -368,5 +391,8 @@ function initCanvas(coverImg, mediaEl) {
     scratch(e);
   }, { passive: false });
 
-  canvas.addEventListener('touchend', endScratch);
+  canvas.addEventListener('touchend', () => {
+    endScratch();
+    checkScratchedPercentage();
+  });
 }
