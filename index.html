@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carte à Gratter magique ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div id="root">
+
+    <!-- CREATOR INTERFACE -->
+    <div id="creator-app" class="fade-in">
+      <div class="glass-panel">
+        <h1>✨ Créez votre Carte Magique</h1>
+        <p class="subtitle">Offrez une surprise inoubliable avec une carte à gratter personnalisée.</p>
+
+        <form id="creator-form">
+          <div class="input-group">
+            <label>1. Votre Message Caché</label>
+            <input type="text" id="input-message" placeholder="Joyeux Anniversaire ! ❤️" maxlength="50" required>
+          </div>
+
+          <div class="input-group">
+            <label>2. Image à Gratter (Couverture)</label>
+            <div class="options">
+              <button type="button" class="option-btn active" data-cover="default">Or & Cœurs</button>
+              <button type="button" class="option-btn" data-cover="custom">Lien Personnalisé</button>
+            </div>
+            <input type="url" id="input-cover-url" placeholder="https://..." class="hidden">
+          </div>
+
+          <div class="input-group">
+            <label>3. L'Arrière-Plan (Surprise)</label>
+            <div class="options">
+              <button type="button" class="option-btn active" data-bg="default">Romantique</button>
+              <button type="button" class="option-btn" data-bg="custom-img">Photo (URL)</button>
+              <button type="button" class="option-btn" data-bg="custom-video">Vidéo (URL)</button>
+            </div>
+            <input type="url" id="input-bg-url" placeholder="https://..." class="hidden">
+          </div>
+
+          <div class="actions">
+            <button type="submit" id="generate-btn">Générer le Lien ✨</button>
+            <button type="button" id="preview-btn" class="secondary">Prévisualiser</button>
+          </div>
+        </form>
+
+        <div id="result-area" class="hidden">
+          <div class="divider"></div>
+          <h3>Votre lien est prêt !</h3>
+          <div class="link-box">
+            <input type="text" id="share-link" readonly>
+            <button id="copy-btn">Copier</button>
+          </div>
+          <a href="#" id="open-link-btn" target="_blank" class="preview-link">Ouvrir la carte</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEWER INTERFACE (CARD) -->
+    <div id="viewer-app" class="hidden">
+      <div id="background-container">
+        <!-- Media will be injected here -->
+      </div>
+      <div id="overlay-text"></div>
+      <canvas id="scratch-canvas"></canvas>
+      <div class="scratch-hint">
+        <div class="hand-animation">👆</div>
+        <span>Grattez pour découvrir !</span>
+      </div>
+    </div>
+
+  </div>
+  <script type="module" src="./main.js"></script>
+</body>
+
+</html>
