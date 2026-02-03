@@ -209,7 +209,7 @@ function initViewer(config) {
   const height = window.innerHeight;
   // If height > width (portrait) -> telephone.jpg, else -> ordi.jpg
   const isPortrait = height > width;
-  const fixedBg = isPortrait ? `${BASE_URL}telephone.jpg` : `${BASE_URL}ordi.jpg`;
+  const fixedBg = isPortrait ? `${BASE_URL}TEL_LD.jpg` : `${BASE_URL}ordi_LD.jpg`;
 
   // Convert Drive Link if needed - try multiple formats
   const normalizeUrl = (url) => {
