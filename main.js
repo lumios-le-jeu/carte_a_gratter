@@ -355,7 +355,12 @@ function initViewer(config) {
   viewerBgContainer.appendChild(mediaEl);
 
   // 3. Setup Scratch Canvas - with proxy retry
+  const loadingIndicator = document.getElementById('loading-indicator');
+
   const loadCover = (url, useProxy = false, useCors = true) => {
+    // Show loading indicator
+    loadingIndicator.classList.remove('hidden');
+
     const img = new Image();
     if (useCors) img.crossOrigin = 'Anonymous';
 
@@ -363,18 +368,21 @@ function initViewer(config) {
     img.src = targetUrl;
 
     img.onload = () => {
+      loadingIndicator.classList.add('hidden');
       initCanvas(img, mediaEl);
     };
 
     img.onerror = () => {
       if (!useProxy && url.includes('drive.google.com')) {
         console.warn("Direct Drive load failed, trying with CORS proxy...");
+        // Don't hide loader, just retry
         loadCover(url, true, useCors);
       } else if (useCors) {
         console.warn("CORS load failed, retrying without CORS (Tainted mode)...");
         loadCover(url, useProxy, false);
       } else {
         console.error("Failed to load cover image completely");
+        loadingIndicator.classList.add('hidden');
         // Draw distinct fallback
         ctx.fillStyle = '#C0C0C0';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
