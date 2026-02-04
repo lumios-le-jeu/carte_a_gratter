@@ -241,16 +241,16 @@ button:hover {
   text-decoration: underline;
 }
 
-/* Logo Footer */
-.logo-footer {
+/* Logo Header */
+.logo-header {
   text-align: center;
-  margin-top: 30px;
+  margin-bottom: 30px;
   padding: 20px 0;
   max-width: 500px;
   width: 100%;
 }
 
-.logo-footer img {
+.logo-header img {
   width: 100%;
   max-width: 500px;
   height: auto;
@@ -258,8 +258,29 @@ button:hover {
   transition: opacity 0.3s ease;
 }
 
-.logo-footer img:hover {
+.logo-header img:hover {
   opacity: 1;
+}
+
+/* Footer Credit - Lien Discret */
+.footer-credit {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px 0;
+}
+
+.footer-credit a {
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 300;
+  transition: color 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.footer-credit a:hover {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
 }
 
 /* --- VIEWER VIEW --- */
