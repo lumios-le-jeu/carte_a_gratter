@@ -44,51 +44,11 @@ body {
   filter: blur(1px);
 }
 
-/* Différentes balles avec couleurs et tailles */
-.ball-1 {
-  width: 80px;
-  height: 80px;
-  background: #ff4444;
-  top: 10%;
-  left: 10%;
-  animation: bounce1 10s linear infinite;
+/* Classe pour les balles gérées par la physique JavaScript */
+.ball-physics {
+  pointer-events: none;
 }
 
-.ball-2 {
-  width: 80px;
-  height: 80px;
-  background: #4444ff;
-  top: 30%;
-  left: 70%;
-  animation: bounce2 12s linear infinite;
-}
-
-.ball-3 {
-  width: 80px;
-  height: 80px;
-  background: #44ff44;
-  top: 50%;
-  left: 40%;
-  animation: bounce3 15s linear infinite;
-}
-
-.ball-4 {
-  width: 80px;
-  height: 80px;
-  background: #ff4444;
-  top: 70%;
-  left: 25%;
-  animation: bounce4 11s linear infinite;
-}
-
-.ball-5 {
-  width: 80px;
-  height: 80px;
-  background: #4444ff;
-  top: 20%;
-  left: 85%;
-  animation: bounce5 13s linear infinite;
-}
 
 /* --- CREATOR VIEW --- */
 #creator-app {
