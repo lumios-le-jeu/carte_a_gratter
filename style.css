@@ -244,8 +244,8 @@ button:hover {
 /* Logo Header */
 .logo-header {
   text-align: center;
-  margin-bottom: 15px;
-  padding: 20px 0;
+  margin-bottom: 5px;
+  padding: 20px 0 10px 0;
   max-width: 500px;
   width: 100%;
 }
