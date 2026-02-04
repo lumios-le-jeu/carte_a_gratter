@@ -109,9 +109,14 @@ function initBalls() {
 
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const isMobile = width < 768;
 
-    // Créer les balles avec des positions et vitesses aléatoires - TOUTES ROUGES AU DÉPART
-    const balls = [
+    // Sur mobile: seulement 2 balles pour éviter l'envahissement
+    // Sur desktop: 5 balles
+    const balls = isMobile ? [
+        new Ball(width * 0.1, height * 0.2, 1.5, 1, 'red'),
+        new Ball(width * 0.7, height * 0.5, -1.3, 1.5, 'red')
+    ] : [
         new Ball(width * 0.1, height * 0.2, 2, 1.5, 'red'),
         new Ball(width * 0.7, height * 0.3, -1.8, 2.2, 'red'),
         new Ball(width * 0.4, height * 0.5, 1.5, -1.8, 'red'),

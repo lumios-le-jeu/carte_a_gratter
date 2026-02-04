@@ -50,12 +50,14 @@ body {
 }
 
 
-/* --- CREATOR VIEW --- */
+/* --- CREATOR VIEW ---
+Interface au premier plan, les balles passent en dessous */
 #creator-app {
   width: 100%;
   max-width: 500px;
   padding: 20px;
-  z-index: 10;
+  z-index: 100;
+  position: relative;
 }
 
 .glass-panel {
@@ -66,6 +68,8 @@ body {
   border-radius: 24px;
   padding: 40px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  position: relative;
+  z-index: 101;
 }
 
 /* Configuration Panel */
@@ -607,16 +611,57 @@ button:hover {
 }
 
 @keyframes pulse {
-  0% {
+
+  0%,
+  100% {
     transform: translateX(-50%) scale(1);
   }
 
   50% {
     transform: translateX(-50%) scale(1.05);
   }
+}
 
-  100% {
-    transform: translateX(-50%) scale(1);
+/* --- MOBILE RESPONSIVE --- */
+@media (max-width: 768px) {
+  #root {
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  #creator-app {
+    padding: 10px;
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .logo-header {
+    margin-top: 10px;
+    margin-bottom: 0;
+    padding: 10px 0 0 0;
+  }
+
+  .logo-header img {
+    max-width: 200px;
+  }
+
+  .glass-panel {
+    padding: 20px;
+    margin-top: 10px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .footer-credit {
+    margin-top: 15px;
+    padding: 10px 0;
   }
 }
 
