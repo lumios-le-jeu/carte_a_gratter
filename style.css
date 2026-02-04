@@ -48,43 +48,43 @@ body {
 .ball-1 {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ff4444;
   top: 10%;
   left: 10%;
   animation: bounce1 10s linear infinite;
 }
 
 .ball-2 {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  width: 80px;
+  height: 80px;
+  background: #4444ff;
   top: 30%;
   left: 70%;
   animation: bounce2 12s linear infinite;
 }
 
 .ball-3 {
-  width: 100px;
-  height: 100px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  width: 80px;
+  height: 80px;
+  background: #44ff44;
   top: 50%;
   left: 40%;
   animation: bounce3 15s linear infinite;
 }
 
 .ball-4 {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  width: 80px;
+  height: 80px;
+  background: #ff4444;
   top: 70%;
   left: 25%;
   animation: bounce4 11s linear infinite;
 }
 
 .ball-5 {
-  width: 90px;
-  height: 90px;
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  width: 80px;
+  height: 80px;
+  background: #4444ff;
   top: 20%;
   left: 85%;
   animation: bounce5 13s linear infinite;
