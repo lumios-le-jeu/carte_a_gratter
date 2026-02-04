@@ -5,7 +5,7 @@ const BASE_URL = import.meta.env.BASE_URL || '/';
 const DEFAULTS = {
   cover: `${BASE_URL}scratch_cover.png`,
   bg: `${BASE_URL}demo_background.png`, // Ensure these are in /public
-  msg: 'Joyeux Saint-Valentin ! ❤️',
+  msg: 'Joyeuse Saint-Valentin ❤️',
 };
 
 // State

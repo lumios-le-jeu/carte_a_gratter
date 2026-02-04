@@ -1,7 +1,7 @@
 :root {
   --primary: #ff4757;
   --secondary: #2ed573;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-gradient: #36398D;
   --glass: rgba(255, 255, 255, 0.1);
   --glass-border: rgba(255, 255, 255, 0.2);
   --text: #ffffff;
@@ -241,6 +241,27 @@ button:hover {
   text-decoration: underline;
 }
 
+/* Logo Footer */
+.logo-footer {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px 0;
+  max-width: 500px;
+  width: 100%;
+}
+
+.logo-footer img {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.logo-footer img:hover {
+  opacity: 1;
+}
+
 /* --- VIEWER VIEW --- */
 #viewer-app {
   position: absolute;
@@ -280,7 +301,14 @@ button:hover {
   font-family: 'Playfair Display', serif;
   font-size: 3rem;
   font-weight: 700;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.9),
+    0 0 20px rgba(0, 0, 0, 0.8),
+    0 4px 30px rgba(0, 0, 0, 0.7),
+    2px 2px 4px rgba(0, 0, 0, 1),
+    -2px -2px 4px rgba(0, 0, 0, 1),
+    2px -2px 4px rgba(0, 0, 0, 1),
+    -2px 2px 4px rgba(0, 0, 0, 1);
   pointer-events: auto;
   /* Allow clicking links */
 }
