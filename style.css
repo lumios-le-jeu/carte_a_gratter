@@ -25,6 +25,71 @@ body {
   /* For app-like feel */
 }
 
+/* --- BOUNCING BALLS --- */
+.bouncing-balls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.ball {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.6;
+  filter: blur(1px);
+}
+
+/* Différentes balles avec couleurs et tailles */
+.ball-1 {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: 10%;
+  left: 10%;
+  animation: bounce1 10s linear infinite;
+}
+
+.ball-2 {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  top: 30%;
+  left: 70%;
+  animation: bounce2 12s linear infinite;
+}
+
+.ball-3 {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  top: 50%;
+  left: 40%;
+  animation: bounce3 15s linear infinite;
+}
+
+.ball-4 {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  top: 70%;
+  left: 25%;
+  animation: bounce4 11s linear infinite;
+}
+
+.ball-5 {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  top: 20%;
+  left: 85%;
+  animation: bounce5 13s linear infinite;
+}
+
 /* --- CREATOR VIEW --- */
 #creator-app {
   width: 100%;
@@ -41,7 +106,6 @@ body {
   border-radius: 24px;
   padding: 40px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  animation: float 6s ease-in-out infinite;
 }
 
 /* Configuration Panel */
@@ -267,13 +331,15 @@ button:hover {
   text-align: center;
   margin-top: 30px;
   padding: 20px 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .footer-credit a {
-  color: rgba(255, 255, 255, 0.5);
+  color: inherit;
   text-decoration: underline;
-  font-size: 0.75rem;
-  font-weight: 300;
   transition: color 0.3s ease;
   letter-spacing: 0.5px;
 }
@@ -378,6 +444,193 @@ button:hover {
 
   100% {
     transform: translateY(0px);
+  }
+}
+
+/* Bouncing animations */
+@keyframes bounce1 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  12% {
+    transform: translate(60vw, 0);
+  }
+
+  25% {
+    transform: translate(60vw, 80vh);
+  }
+
+  37% {
+    transform: translate(0, 80vh);
+  }
+
+  50% {
+    transform: translate(0, 0);
+  }
+
+  62% {
+    transform: translate(70vw, 0);
+  }
+
+  75% {
+    transform: translate(70vw, 70vh);
+  }
+
+  87% {
+    transform: translate(0, 70vh);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes bounce2 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  14% {
+    transform: translate(-50vw, 0);
+  }
+
+  28% {
+    transform: translate(-50vw, 60vh);
+  }
+
+  42% {
+    transform: translate(40vw, 60vh);
+  }
+
+  56% {
+    transform: translate(40vw, 0);
+  }
+
+  70% {
+    transform: translate(-30vw, 0);
+  }
+
+  84% {
+    transform: translate(-30vw, 50vh);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes bounce3 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  10% {
+    transform: translate(0, 40vh);
+  }
+
+  20% {
+    transform: translate(50vw, 40vh);
+  }
+
+  30% {
+    transform: translate(50vw, 0);
+  }
+
+  40% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(0, 45vh);
+  }
+
+  60% {
+    transform: translate(-40vw, 45vh);
+  }
+
+  70% {
+    transform: translate(-40vw, 0);
+  }
+
+  80% {
+    transform: translate(30vw, 0);
+  }
+
+  90% {
+    transform: translate(30vw, 35vh);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes bounce4 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  16% {
+    transform: translate(55vw, 0);
+  }
+
+  33% {
+    transform: translate(55vw, -20vh);
+  }
+
+  50% {
+    transform: translate(-35vw, -20vh);
+  }
+
+  66% {
+    transform: translate(-35vw, 0);
+  }
+
+  83% {
+    transform: translate(45vw, 0);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes bounce5 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  12% {
+    transform: translate(-60vw, 0);
+  }
+
+  25% {
+    transform: translate(-60vw, 65vh);
+  }
+
+  37% {
+    transform: translate(35vw, 65vh);
+  }
+
+  50% {
+    transform: translate(35vw, 0);
+  }
+
+  62% {
+    transform: translate(-45vw, 0);
+  }
+
+  75% {
+    transform: translate(-45vw, 55vh);
+  }
+
+  87% {
+    transform: translate(20vw, 55vh);
+  }
+
+  100% {
+    transform: translate(0, 0);
   }
 }
 
