@@ -283,6 +283,12 @@ button:hover {
   text-decoration: underline;
 }
 
+.footer-credit .footer-url {
+  font-size: 0.7rem;
+  margin-top: 5px;
+  display: inline-block;
+}
+
 /* --- VIEWER VIEW --- */
 #viewer-app {
   position: absolute;
