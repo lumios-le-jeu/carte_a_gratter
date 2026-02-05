@@ -127,19 +127,19 @@ function initCreator() {
 
 async function shortenURL(url) {
   try {
-    // Original implementation: is.gd via api.allorigins.win/raw
+    // Nouvelle implémentation : TinyURL via api.allorigins.win/raw
     const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const targetUrl = `https://is.gd/create.php?format=simple&url=${encodeURIComponent(url)}`;
+    const targetUrl = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`;
 
     const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
     if (response.ok) {
       const shortUrl = await response.text();
-      if (shortUrl.startsWith('https://is.gd/')) {
+      if (shortUrl.includes('tinyurl.com')) {
         return shortUrl.trim();
       }
     }
   } catch (err) {
-    console.warn('URL shortening failed:', err);
+    console.warn('TinyURL shortening failed:', err);
   }
   return url;
 }
