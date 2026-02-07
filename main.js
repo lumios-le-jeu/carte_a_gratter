@@ -126,22 +126,45 @@ function initCreator() {
 }
 
 async function shortenURL(url) {
-  try {
-    // Nouvelle implémentation : TinyURL via api.allorigins.win/raw
-    const proxyUrl = 'https://api.allorigins.win/raw?url=';
-    const targetUrl = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`;
+  return new Promise((resolve) => {
+    // Méthode d'or : is.gd avec JSONP pour éviter les erreurs CORS
+    const callbackName = 'isgd_callback_' + Math.floor(Math.random() * 1000000);
 
-    const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
-    if (response.ok) {
-      const shortUrl = await response.text();
-      if (shortUrl.includes('tinyurl.com')) {
-        return shortUrl.trim();
+    window[callbackName] = (data) => {
+      delete window[callbackName];
+      const script = document.getElementById(callbackName);
+      if (script) script.remove();
+
+      if (data.shorturl) {
+        resolve(data.shorturl);
+      } else {
+        console.warn('is.gd failed, data:', data);
+        resolve(url);
       }
-    }
-  } catch (err) {
-    console.warn('TinyURL shortening failed:', err);
-  }
-  return url;
+    };
+
+    const script = document.createElement('script');
+    script.id = callbackName;
+    script.src = `https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}&callback=${callbackName}`;
+    script.onerror = () => {
+      delete window[callbackName];
+      script.remove();
+      console.warn('is.gd script error');
+      resolve(url);
+    };
+
+    document.body.appendChild(script);
+
+    // Timeout de 5s au cas où
+    setTimeout(() => {
+      if (window[callbackName]) {
+        delete window[callbackName];
+        const s = document.getElementById(callbackName);
+        if (s) s.remove();
+        resolve(url);
+      }
+    }, 5000);
+  });
 }
 
 
